@@ -16,7 +16,7 @@
 
 * README
 
-This repository contains the codes necessary to produce an interactive shiny dash board that can be found at https://pharmacoecon.shinyapps.io/SurvivalCurveExtraction/. The original purpose of the document was to serve as the analysis toolkit for generating survival distribution parameters and fit statistics for health technology assessment (HTA) or cost-effectiveness analysis of pharmaceutical interventions. The dashboard entails:
+This repository contains the codes necessary to produce an interactive shiny dash board that can be found at https://pharmacoecon.shinyapps.io/SurvivalCurveExtraction/. The original [Guyot Article](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/1471-2288-12-9)'s code is embedded in the dashboard. The original purpose of the document was to serve as the analysis toolkit for generating survival distribution parameters and fit statistics for health technology assessment (HTA) or cost-effectiveness analysis of pharmaceutical interventions. The dashboard entails:
 
 1. Allowing user to input datasets (as csv) and provide summary statistics of simulated Individual Patient Data (IPD) generated from survival plots of other studies.
 2. Users can specify which distributions to include (e.g. Weibull, Gompertz, and even Splines).
