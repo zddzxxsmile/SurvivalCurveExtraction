@@ -194,18 +194,24 @@ dashboardPage(
                   # Copy the line below to make a text input box
                   textInput("titletxt", label = h3("Input Title"), value = "Enter text...")
                   ,width = 4
+                ),
+                box(
+                  # Copy the line below to make a text input box
+                  textInput("xlab", label = h3("X Label"), value = "Time in Months")
+                  ,width = 4
+                ),
+                box(
+                  # Copy the line below to make a text input box
+                  textInput("ylab", label = h3("Y Label"), value = "S(t)")
+                  ,width = 4
                 )
               ),
             
               fluidRow(
-                box(width = 12,
-                    h2("Survival Distribution Plot"),
-                    fluidRow(
+                width = 10,
                       box(
-                        plotOutput("survplot", width = 700)
+                        plotOutput("survplot", width = 700), width = 10
                       )
-                    )
-              )
         )
       ),
     

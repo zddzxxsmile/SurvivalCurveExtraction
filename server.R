@@ -15,6 +15,10 @@ library(splines)
 library(MASS)
 library(flexsurv)
 library(dplyr)
+library(plotly) # for interactive plot - i.e. download plot and check S(t) at each points
+library(ggplot2)
+library(ggfortify) # for survival plot
+
 
 library(formattable)
 
@@ -378,7 +382,7 @@ shinyServer(function(input, output) {
       SurvObj <- with(IPD(), Surv(IPD()[,1], IPD()[,2]))
       KM <- survfit(SurvObj ~ 1, data=IPD())
       
-      plot(KM, xmax=45, xlab = "months", ylab = "S(t)", main = input$titletxt)
+      plot(KM, xmax=45, xlab = input$xlab, ylab = input$ylab, main = input$titletxt)
       # add the other distribution lines 
       #Plot Exponential
       lines(expfl(), col="red", ci= ifelse(input$confint == 'yes', TRUE, FALSE))
@@ -410,9 +414,7 @@ shinyServer(function(input, output) {
                lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1),
                col = c("black", "red","orange", "yellow", "green", "blue", "purple"))
       }
-      
-      #
-      
+
     } 
   }
   
