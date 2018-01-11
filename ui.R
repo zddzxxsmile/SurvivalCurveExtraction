@@ -15,11 +15,18 @@ dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem("Introduction", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("Data Input", tabName = "data", icon = icon("th")),
+      menuItem("Extraction and Error Check", tabName = "extractData", icon = icon("th")),
+      menuItem("Data Input and Summary", tabName = "data1", icon = icon("th"),
+               collapsesible = 
+                 menuSubItem('random1', tabName = 'random1'),
+               menuSubItem('Data Input', tabName = 'data'),
+               menuSubItem('Summary', tabName = 'datasum')
+               ),
       menuItem('Curve Extraction', tabName = 'results', icon = icon('th'), 
                  collapsible = 
-                   menuSubItem('random', tabName = 'random'),
-                   menuSubItem('Plots', tabName = 'plot'),
+                 menuSubItem('random', tabName = 'random'),
+               menuSubItem('Modeling Options', tabName = 'modelopts'),
+               menuSubItem('Plots', tabName = 'plot'),
                    menuSubItem('Parameter Estimates', tabName = 'regresult'),
                    menuSubItem('Fit Statistics', tabName = 'diag')
         )
@@ -47,37 +54,45 @@ dashboardPage(
                   h4(strong("Below:"),"are some examples of the steps outlined above. If you have any questions regarding how to go about each step please consult Guyot et al. first and if still difficult to proceed e-mail: chong.kim@ucdenver.edu")  
                   
                 ,width = 12)
-              ),
-              
-              fluidRow(
-                box(
-                  h4(strong("Number 1")),
-                  
-                  img(src='step1.gif', align = 'center')
-                  , width = 12 , align = 'center'
-                )
-                
-              ),
-              
-              fluidRow(
-                column(8,
-                  box(
-                    h4(strong("Number 2")),
-                    
-                    img(src='step2.gif', align = 'center'),
-                    
-                    h4("Currently the most important aspect with regards to checking whether or not the survival curve is appropriate is to determine if it is monotone decreasing (i.e. not increasing). Due to approximation errors in the webplotdigitizer, there may be points that have higher S(t) than the previous time point. ")
-                    
-                    
-                    , width = 8, align = 'center'
-                  ), offset = 3
-                )
-                
-                
               )
-              
-              
-      ),
+          
+              ),
+      
+      # Second Tab content: Information for gathering csv files
+    tabItem(tabName = "extractData",
+             
+             fluidRow(
+               box(
+                 h2("Extraction and Error Checking"),
+                 
+                 h4('If the required survival curve and number at risk csv files are not extracted beforehand, please follow the', a("Tutorial", href="https://github.com/ck2136/SurvivalCurveExtraction/blob/master/SurvivalExtractionforCEA.ipynb"),' so that the user can extract the curve according to Guyot et al. then be able to generate survival distribution parameter estimates')
+                 ,width = 12
+               )
+             ),
+             
+             fluidRow(
+               box(
+                 h4(strong("Preview of the tutorial")),
+                 
+                 img(src='step1.gif', align = 'center')
+                 , width = 12 , align = 'center'
+               )
+            ),
+            
+            fluidRow(
+              column(8,
+                     box(
+                       h4(strong("Preview of Number 2")),
+                       
+                       img(src='step2.gif', align = 'center'),
+                       
+                       h4("Currently the most important aspect with regards to checking whether or not the survival curve is appropriate is to determine if it is monotone decreasing (i.e. not increasing). Due to approximation errors in the webplotdigitizer, there may be points that have higher S(t) than the previous time point. The tutorial in the above Tutorial link has python code to remedy non-monotonic S(t) but there are also ways to do this in excel.")
+                       , width = 8, align = 'center'
+                     ), offset = 3
+              )
+             
+             )
+    ),
       
       # Second Tab content: Data and SUmmary
       tabItem(tabName = "data",
@@ -102,52 +117,62 @@ dashboardPage(
               h3("Control or Treatment Indicator. Control = 0; Treatment = 1"),
               numericInput('arm.id',"Arm ID", 1, min = 0, max = 1),
               
-              # Options to include splines and how many knots and etc
-              
-              fluidRow(
-                box(
-                  radioButtons('splin','Include Splines?',
-                              choices =  c(
-                                "Yes" = 'yes',
-                                "No" = 'no'), selected = 'no')
-                )),
-              
-              
-              # View quick summary statistics
-              # Create row to check the data
-              h3("Data View of Curve Data"),
-              fluidRow( dataTableOutput("filetable1")),
-              
-              h3("Data View of Number at Risk Data"),
-              fluidRow( dataTableOutput("filetable2")),
-              
-              h3("Raw Individual Patient Data (IPD) View"),
-              verbatimTextOutput("dat1"),
-              
-              h3("Survival Probability Table"),
-              verbatimTextOutput("KMsum"),
-              
               strong('R session info'),
               verbatimTextOutput("info")
               
       ),
-
-    
-      # Parameter Estimates tab content
-      tabItem(tabName = "regresult",
-              
-              h2("Parameter Estimates"),
+      
+      # Data SUmmary tab content
+      
+      tabItem(tabName = 'datasum',
               
               fluidRow(
                 box(
-                  h3("Survival Distribution Parameters"),
-                  verbatimTextOutput("exp")
-                  ,width = 12
+                  h2(strong("Data Summary")),
+                  
+                  # View quick summary statistics
+                  # Create row to check the data
+                  h3("Data View of Curve Data"),
+                  fluidRow( dataTableOutput("filetable1")),
+                  
+                  h3("Data View of Number at Risk Data"),
+                  fluidRow( dataTableOutput("filetable2")),
+                  
+                  h3("Data View of Number at Risk Data"),
+                  fluidRow( dataTableOutput("IPDtable")),
+                  
+                  h3("Survival Probability Table"),
+                  verbatimTextOutput("KMsum")
+                  , width = 12
                 )
               )
               
+            ),
+
+    
+      # Model Options tab content
+      tabItem(tabName = "modelopts",
               
+              fluidRow(
+                box(
+                  h2("Modeling Options"),
+                  
+                  radioButtons('splineyn','Splines?',
+                               choices =  c(
+                                 "Yes" = 'yes',
+                                 "No" = 'no'), selected = 'no')
+                  ,width = 12
+                )
+              ),
+              
+              # add conditional panel if the splineyn == 'yes'
+              
+              conditionalPanel("input.splineyn == 'yes'",
+                               sliderInput('numspline', "Number of splines:",
+                                           min = 1, max = 100, value = 1, step = 1)
+                               )
       ),
+      
       
       # Plots tab: Plot submenu of result
       tabItem(tabName = "plot",
@@ -159,6 +184,11 @@ dashboardPage(
                                choices =  c(
                                  "Yes" = 'yes',
                                  "No" = 'no'), selected = 'no')
+                  ,width = 4
+                ),
+                box(
+                  # Copy the line below to make a text input box
+                  textInput("titletxt", label = h3("Input Title"), value = "Enter text...")
                   ,width = 4
                 )
               ),
@@ -172,18 +202,37 @@ dashboardPage(
                       )
                     )
               )
-    )
+        )
       ),
-      
+    
+    
+      # Parameter Estimates tab content
+      tabItem(tabName = "regresult",
+              
+              h2("Parameter Estimates"),
+              
+              fluidRow(
+                box(
+                  h3("Survival Distribution Parameters"),
+                  fluidRow( dataTableOutput("parest"))
+                  ,width = 12
+                )
+                
+
+              )
+              
+              
+      ),
+    
       # Sixth tab: Fit statistics/Diagnostic
       tabItem(tabName = "diag",
               h2("Fit Statistics"),
               
               fluidRow(
                 box(
-                  h4("AIC and BIC"),
-                  verbatimTextOutput("aicbic")
-                  , width = 12
+                  h3("Fit Statistics"),
+                  fluidRow( dataTableOutput("fitstat"))
+                  ,width = 12
                 )
               )
               

@@ -61,6 +61,10 @@ shinyServer(function(input, output) {
     filedata1()
   })
   
+  output$IPDtable <- renderDataTable({
+    IPD()
+  })
+  
   output$filetable2 <- renderDataTable({
     filedata2()
   })
@@ -69,11 +73,7 @@ shinyServer(function(input, output) {
   output$info <- renderPrint({
     sessionInfo()
   })
-  
-  output$dat1 <- renderPrint({
-    IPD()
-  })
-  
+
   output$exp <- renderPrint({
     expfl()
   })
@@ -294,6 +294,11 @@ shinyServer(function(input, output) {
   
   # Fit survival distributions
   
+  exp <- reactive({
+    survreg(Surv(IPD()[,1], IPD()[,2])~1, dist="exponential")   # Exponential function, interval censoring			
+  })
+  
+  
   expfl <- reactive({
     flexsurvreg(Surv(IPD()[,1], IPD()[,2])~1, dist="exponential")   # Exponential function, interval censoring				
   })
@@ -318,16 +323,21 @@ shinyServer(function(input, output) {
     flexsurvreg(Surv(IPD()[,1], IPD()[,2])~1, dist="weibull")   # Loglogistic function, interval censoring						
   })
   
+  splinefl <- reactive({
+    flexsurvspline(Surv(IPD()[,1], IPD()[,2])~1, k = input$numspline, scale = "hazard") # spline
+  }) 
+  
+  
   # Make Plots
   
   makeplot <- function(){
     # If splin == yes, include splin in the distribution plot
-    if(input$splin == 'yes'){
+    if(input$splineyn == 'yes'){
       
       SurvObj <- with(IPD(), Surv(IPD()[,1], IPD()[,2]))
       KM <- survfit(SurvObj ~ 1, data=IPD())
       
-      plot(KM, xmax=45, xlab = "months", ylab = "S(t)", main = "Survival Plot")
+      plot(KM, xmax=45, xlab = "months", ylab = "S(t)", main = input$titletxt)
       # add the other distribution lines 
       #Plot Exponential
       lines(expfl(), col="red", ci= ifelse(input$confint == 'yes', TRUE, FALSE))
@@ -342,9 +352,9 @@ shinyServer(function(input, output) {
       
       lines(lnormfl(), col = 'blue', ci = ifelse(input$confint == 'yes', TRUE, FALSE))
       
-      lines(gompert(), color = "purple", ci = ifelse(input$confint == 'yes', TRUE, FALSE))
+      lines(gompert(), col = "purple", ci = ifelse(input$confint == 'yes', TRUE, FALSE))
       
-      lines(spline1, color = "chocolate", ci = ifelse(input$confint == 'yes', TRUE, FALSE))
+      lines(splinefl(), col = "chocolate", ci = ifelse(input$confint == 'yes', TRUE, FALSE))
       
       ## Add legends
       legend(x = "bottomleft",
@@ -357,7 +367,7 @@ shinyServer(function(input, output) {
       SurvObj <- with(IPD(), Surv(IPD()[,1], IPD()[,2]))
       KM <- survfit(SurvObj ~ 1, data=IPD())
       
-      plot(KM, xmax=45, xlab = "months", ylab = "S(t)", main = "Survival Plot")
+      plot(KM, xmax=45, xlab = "months", ylab = "S(t)", main = input$titletxt)
       # add the other distribution lines 
       #Plot Exponential
       lines(expfl(), col="red", ci= ifelse(input$confint == 'yes', TRUE, FALSE))
@@ -388,82 +398,67 @@ shinyServer(function(input, output) {
   })
   
   
-  # Tabular Numbers
+  # Parameter Estimates
+  
+  est <- reactive({
+
+    sstab <- data.frame(c("Exponential","Weibull","Log-normal","Log-logistic","Gompertz", "Generalized-Gamma"),
+                        c(1, base::exp(weibfl()$coefficients[1]), 
+                          lnormfl()$coefficients[1], base::exp(llogfl()$coefficients[1]),
+                          gompert()$coefficients[1], gengam()$coefficients[1]),
+                        c(1/base::exp(exp()$coefficients), base::exp(weibfl()$coefficients[2]),
+                          base::exp(lnormfl()$coefficients[2]), base::exp(llogfl()$coefficients[2]),
+                          base::exp(gompert()$coefficients[2]), base::exp(gengam()$coefficients[2])),
+                        c("NA","NA","NA","NA","NA", base::exp(gengam()$coefficients[3]))
+    )
+    names(sstab) <- c("Model","Shape","Scale","GenGamparam")
+    
+    ptab <- cbind(sstab$Model, data.frame(lapply(sstab[2:ncol(sstab)], function(x)  round(as.numeric(as.character(x)), 3))))
+    
+    ptab
+  })
+  
+  output$parest <- renderDataTable({
+    est()
+  })
+  
+  
+  # AIC/BIC fit statistics
+  
+  fitstats <- reactive({
+    if(input$splineyn == 'yes'){
+      x <- list(exp(), weibfl(), lnormfl(), llogfl(), gengam(), gompert(), splinefl())
+      aictable <- do.call(cbind, lapply(lapply(x, function(x) {
+        c(AIC(x), BIC(x))
+      }), data.frame, stringsAsFactors=FALSE))
+      names(aictable) <- c("Exponential","Weibull","Log-normal","Log-logistic","Generalized-Gamma","Gompertz", "Spline")
+      rownames(aictable) <- c("AIC", "BIC")
+    } else {
+      x <- list(exp(), weibfl(), lnormfl(), llogfl(), gengam(), gompert())
+      aictable <- do.call(cbind, lapply(lapply(x, function(x) {
+        c(AIC(x), BIC(x))
+      }), data.frame, stringsAsFactors=FALSE))
+      names(aictable) <- c("Exponential","Weibull","Log-normal","Log-logistic","Generalized-Gamma","Gompertz")
+      rownames(aictable) <- c("AIC", "BIC")
+    }
+    t(aictable)
+  })
+  
+  output$fitstat <- renderDataTable({
+    fitstats()
+  })
+  
   
   ## Standardized Solutions
   
   output$stdsol <- renderFormattable({
     formattable(standardizedsolution(est()$fit),  digits = 4)
   })
-
-  ## Overall Summary of Model
   
-  result <- reactive({
-    if(input$anal == 'pls'){
-      res <- plsmod()
-      res <- summary(res)
-    } else {
-      res <- est()$fit
-      res <- summary(res, standardized=TRUE, fit.measures=TRUE)
-    } 
-    res
-  })
-  result1 <- reactive({
-    if(input$anal == 'sem' || input$anal == 'growth' || input$anal == 'cfa'){
-      res <- est()$fit
-      res <- summary(res, standardized=TRUE, fit.measures=TRUE)
-    }
-    res
-  })
-  
-  result2 <- reactive({
-    if(input$anal == 'efa'){
-      res <- est()
-    }
-    res
-  })
-  
-  resultpca <- reactive({
-    if(input$anal == 'efa' && input$efalysisopt == 'pca'){
-      res <- est()
-    }
-    res$fit$loadings
-  })
-  
-  output$result <- renderPrint({
-    result()
-  })
-  output$result1 <- renderPrint({
-    result1()
-  })
-  output$resultefa <- renderPrint({
-    result2()
-  })
-  output$resultefapca <- renderPrint({
-    resultpca()
-  })
-  
-  outputOptions(output, 'result', suspendWhenHidden=FALSE)
+  outputOptions(output, 'parest', suspendWhenHidden=FALSE)
   # Rsquared
   
-  output$aicbic <- renderPrint({
-    if(input$anal == 'pls'){
-      r2 <- plsmod()$inner_summary[, "R2", drop = FALSE]
-    } else {
-      r2 <- inspect(est()$fit, "rsquare")
-    }
-    r2
-  })
+
   
-  # Fit measures
-  
-  output$fm <- renderPrint({
-    if(input$anal == 'pls'){
-      fm <- plsmod()$gof
-    } else {
-      fm <- fitmeasures(est()$fit)
-    }
-    fm
-  })
   
 })
