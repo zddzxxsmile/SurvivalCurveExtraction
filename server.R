@@ -406,7 +406,7 @@ shinyServer(function(input, output) {
                         c(1, base::exp(weibfl()$coefficients[1]), 
                           lnormfl()$coefficients[1], base::exp(llogfl()$coefficients[1]),
                           gompert()$coefficients[1], gengam()$coefficients[1]),
-                        c(1/base::exp(exp()$coefficients), base::exp(weibfl()$coefficients[2]),
+                        c(base::exp(exp()$coefficients), base::exp(weibfl()$coefficients[2]),
                           base::exp(lnormfl()$coefficients[2]), base::exp(llogfl()$coefficients[2]),
                           base::exp(gompert()$coefficients[2]), base::exp(gengam()$coefficients[2])),
                         c("NA","NA","NA","NA","NA", base::exp(gengam()$coefficients[3]))
