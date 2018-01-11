@@ -183,9 +183,13 @@ dashboardPage(
                   radioButtons('confint','Confidence Intervals?',
                                choices =  c(
                                  "Yes" = 'yes',
-                                 "No" = 'no'), selected = 'no')
-                  ,width = 4
-                ),
+                                 "No" = 'no'), selected = 'no'),
+                  radioButtons('wpdcurve','Add Digitized Curve?',
+                               choices = c(
+                                 "Yes" = 'yes',
+                                 "No" = 'no'), selected = 'no'
+                               )
+                  ,width = 4),
                 box(
                   # Copy the line below to make a text input box
                   textInput("titletxt", label = h3("Input Title"), value = "Enter text...")

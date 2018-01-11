@@ -356,11 +356,22 @@ shinyServer(function(input, output) {
       
       lines(splinefl(), col = "chocolate", ci = ifelse(input$confint == 'yes', TRUE, FALSE))
       
-      ## Add legends
-      legend(x = "bottomleft",
-             legend = c("Kaplan-Meier","Exp" ,"Gen-Gamma", "Log-logistic", "Weibull", "Log-Normal", "Gompertz", "Spline"),
-             lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1,1),
-             col = c("black", "red","orange", "yellow", "green", "blue", "purple", "chocolate"))
+      if(input$wpdcurve == 'yes'){
+        lines(filedata1()[,input$vars2],filedata1()[,input$vars1], col = "cyan")
+        ## Add legends
+        legend(x = "bottomleft",
+               legend = c("Kaplan-Meier","Exp" ,"Gen-Gamma", "Log-logistic", "Weibull", "Log-Normal", "Gompertz", "Spline","Digitized"),
+               lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1,1,1),
+               col = c("black", "red","orange", "yellow", "green", "blue", "purple", "chocolate","cyan"))
+      } else {
+        ## Add legends
+        legend(x = "bottomleft",
+               legend = c("Kaplan-Meier","Exp" ,"Gen-Gamma", "Log-logistic", "Weibull", "Log-Normal", "Gompertz", "Spline"),
+               lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1,1),
+               col = c("black", "red","orange", "yellow", "green", "blue", "purple", "chocolate"))
+      }
+      
+      
       
     } else {
       # no spline plot
@@ -384,11 +395,23 @@ shinyServer(function(input, output) {
       
       lines(gompert(), color = "purple", ci = ifelse(input$confint == 'yes', TRUE, FALSE))
       
-      ## Add legends
-      legend(x = "bottomleft",
-             legend = c("Kaplan-Meier","Exp" ,"Gen-Gamma", "Log-logistic", "Weibull", "Log-Normal", "Gompertz"),
-             lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1),
-             col = c("black", "red","orange", "yellow", "green", "blue", "purple"))
+      if(input$wpdcurve == 'yes'){
+        lines(filedata1()[,input$vars2],filedata1()[,input$vars1], col = "cyan")
+        
+        # Add legends w Digitized curve
+        legend(x = "bottomleft",
+               legend = c("Kaplan-Meier","Exp" ,"Gen-Gamma", "Log-logistic", "Weibull", "Log-Normal", "Gompertz","Digitized"),
+               lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1,1),
+               col = c("black", "red","orange", "yellow", "green", "blue", "purple",'cyan'))
+      } else {
+        # Add legends wo Digitized curve
+        legend(x = "bottomleft",
+               legend = c("Kaplan-Meier","Exp" ,"Gen-Gamma", "Log-logistic", "Weibull", "Log-Normal", "Gompertz"),
+               lwd = 2, bty = "n", lty=c(1,1,1,1,1,1,1),
+               col = c("black", "red","orange", "yellow", "green", "blue", "purple"))
+      }
+      
+      #
       
     } 
   }
