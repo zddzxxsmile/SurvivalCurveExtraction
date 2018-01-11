@@ -138,7 +138,7 @@ dashboardPage(
                   h3("Data View of Number at Risk Data"),
                   fluidRow( dataTableOutput("filetable2")),
                   
-                  h3("Data View of Number at Risk Data"),
+                  h3("Individual Patient Data (IPD) View"),
                   fluidRow( dataTableOutput("IPDtable")),
                   
                   h3("Survival Probability Table"),
