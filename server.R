@@ -431,12 +431,19 @@ shinyServer(function(input, output) {
                         c(1, base::exp(weibfl()$coefficients[1]), 
                           lnormfl()$coefficients[1], base::exp(llogfl()$coefficients[1]),
                           gompert()$coefficients[1], gengam()$coefficients[1]),
+                        c("NA",weibfl()$res[1,2],lnormfl()$res[1,2],llogfl()$res[1,2],gompert()$res[1,2],gengam()$res[1,2]),
+                        c("NA",weibfl()$res[1,3],lnormfl()$res[1,3],llogfl()$res[1,3],gompert()$res[1,3],gengam()$res[1,3]),
                         c(base::exp(exp()$coefficients), base::exp(weibfl()$coefficients[2]),
                           base::exp(lnormfl()$coefficients[2]), base::exp(llogfl()$coefficients[2]),
                           base::exp(gompert()$coefficients[2]), base::exp(gengam()$coefficients[2])),
-                        c("NA","NA","NA","NA","NA", base::exp(gengam()$coefficients[3]))
+                        c(expfl()$res[1,2],weibfl()$res[2,2],lnormfl()$res[2,2],llogfl()$res[2,2],gompert()$res[2,2],gengam()$res[2,2]),
+                        c(expfl()$res[1,3],weibfl()$res[2,3],lnormfl()$res[2,3],llogfl()$res[2,3],gompert()$res[2,3],gengam()$res[2,3]),
+                        c("NA","NA","NA","NA","NA", base::exp(gengam()$coefficients[3])),
+                        c("NA","NA","NA","NA","NA",gengam()$res[3,2]),
+                        c("NA","NA","NA","NA","NA",gengam()$res[3,3])
+                        
     )
-    names(sstab) <- c("Model","Shape","Scale","GenGamparam")
+    names(sstab) <- c("Model","Shape","L95%",'U95%',"Scale","L95%",'U95%',"GenGamparam","L95%","U95%")
     
     ptab <- cbind(sstab$Model, data.frame(lapply(sstab[2:ncol(sstab)], function(x)  round(as.numeric(as.character(x)), 3))))
     
@@ -446,6 +453,9 @@ shinyServer(function(input, output) {
   output$parest <- renderDataTable({
     est()
   })
+  
+  # Estimate and ConfInt
+  
   
   
   # AIC/BIC fit statistics
