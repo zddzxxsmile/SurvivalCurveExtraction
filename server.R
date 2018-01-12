@@ -283,6 +283,7 @@ shinyServer(function(input, output) {
     
     IPData <-matrix(c(t.IPD,event.IPD,arm),ncol=3,byrow=F)
     IPData <-as.data.frame(IPData)
+    colnames(IPData) <- c("Time","Event","Treatment")
     #IPData
     IPData
   })
